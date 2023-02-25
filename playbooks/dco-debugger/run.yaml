@@ -1,0 +1,78 @@
+- name: DCO dco-debugger
+  hosts: all
+  tasks:
+    - name: Get zuul.executor.work_root
+      ansible.builtin.debug:
+        msg: "{{ zuul.executor.work_root }}"
+      failed_when: false
+
+    - name: Get zuul.project.src_dir
+      ansible.builtin.debug:
+        msg: "{{ zuul.project.src_dir }}"
+      failed_when: false
+
+    - name: Get dco absolute path
+      ansible.builtin.debug:
+        msg: "{{ zuul.executor.work_root }}/{{ zuul.project.src_dir }}"
+      failed_when: false
+
+    - name: Get current path
+      ansible.builtin.shell:
+        cmd: "pwd"
+      register: current_path
+      failed_when: false
+
+    - name: Debug current path
+      ansible.builtin.debug:
+        msg: "{{ current_path.stdout }}"
+
+    - name: Test if zuul.executor.work_root exists
+      ansible.builtin.shell:
+        cmd: "test -d {{ zuul.executor.work_root }} && echo 'zuul.executor.work_root does exist' || echo 'zuul.executor.work_root does NOT exist'"
+      register: output_1
+      failed_when: false
+
+    - name: Test if zuul.project.src_dir exists
+      ansible.builtin.shell:
+        cmd: "test -d {{ zuul.project.src_dir }} && echo 'zuul.project.src_dir does exist' || echo 'zuul.project.src_dir does NOT exist'"
+      register: output_2
+      failed_when: false
+
+    - name: Test if dco abolute path exists
+      ansible.builtin.shell:
+        cmd: "test -d {{ zuul.executor.work_root }}/{{ zuul.project.src_dir }} && echo 'dco absolute path does exist' || echo 'dco absolute path does NOT exist'"
+      register: output_3
+      failed_when: false
+
+    - name: debug directory existances
+      ansible.builtin.debug:
+        msg: "{{ item }}"
+      loop:
+        - "{{ output_1.stdout }}"
+        - "{{ output_2.stdout }}"
+        - "{{ output_3.stdout }}"
+
+    - name: install tree
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+        name: tree
+
+    - name: check zuul.executor.work_root content
+      ansible.builtin.shell:
+        cmd: "tree {{ zuul.executor.work_root }}"
+      register: output_tree_1
+      failed_when: false
+
+    - name: check dco absolute path content
+      ansible.builtin.shell:
+        cmd: "tree {{ zuul.executor.work_root }}/{{ zuul.project.src_dir }}"
+      register: output_tree_2
+      failed_when: false
+
+    - name: debug tree outputs
+      ansible.builtin.debug:
+        msg:
+      loop:
+        - "{{ output_tree_1.stdout }}"
+        - "{{ output_tree_2.stdout }}"

@@ -1,10 +1,18 @@
+---
+- job:
+    name: dco-debugger
+    run: playbooks/dco-debugger/run.yaml
+
 - project:
     merge-mode: "squash-merge"
     check:
       jobs:
+        - dco-debugger
+        - dco-license
         - flake8
         - hadolint
     gate:
       jobs:
+        - dco-license
         - flake8
         - hadolint
